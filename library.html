@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mikasa Ventures — Off-The-Shelf Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mikasa.css">
+<style>
+  .series {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+  .series.expanded { border-color: var(--border-strong); }
+  .series-header {
+    display: flex;
+    align-items: center;
+    padding: 18px 22px;
+    gap: 18px;
+    cursor: pointer;
+    background: var(--surface);
+    transition: background 0.15s ease;
+  }
+  .series-header:hover { background: var(--bg-muted); }
+  .series-num {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 28px;
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    width: 44px;
+    flex-shrink: 0;
+  }
+  .series-meta { flex: 1; min-width: 0; }
+  .series-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .series-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  .series-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .series-stats {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .series-stats .count {
+    color: var(--text);
+    font-weight: 800;
+    font-size: 15px;
+    font-family: var(--font-display);
+  }
+  .chevron {
+    width: 20px; height: 20px;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+  }
+  .series.expanded .chevron { transform: rotate(180deg); color: var(--accent); }
+
+  .episodes {
+    display: none;
+    border-top: 1px solid var(--border);
+    background: var(--bg-muted);
+  }
+  .series.expanded .episodes { display: block; }
+
+  .episode {
+    display: flex;
+    align-items: center;
+    padding: 14px 22px 14px 70px;
+    gap: 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.15s ease;
+  }
+  .episode:last-child { border-bottom: 0; }
+  .episode:hover { background: var(--bg); }
+  .episode.playing { background: var(--accent-soft); }
+  .play {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+  .episode:hover .play { border-color: var(--accent); color: var(--accent); }
+  .episode.playing .play {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #FFF;
+  }
+  .episode-idx {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 600;
+    width: 24px;
+    flex-shrink: 0;
+  }
+  .episode-title {
+    font-size: 14.5px;
+    color: var(--text);
+    font-weight: 500;
+    flex: 1;
+  }
+  .badge-preview {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 3px 7px;
+    border-radius: 3px;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  .episode-dur {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  .trailer-frame {
+    display: none;
+    padding: 0 22px 20px 70px;
+    background: var(--bg-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .trailer-frame.open { display: block; }
+  .trailer-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 4px 0 10px;
+  }
+  .trailer-close {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .trailer-close:hover { color: var(--text); background: var(--surface); }
+  .trailer-inner {
+    width: 100%;
+    max-width: 780px;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .trailer-inner iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+  @media (max-width: 720px) {
+    .episode { padding-left: 22px; }
+    .trailer-frame { padding-left: 22px; }
+    .series-num { font-size: 22px; width: 36px; }
+    .series-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-shell">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="mark"></div>
+      <div class="topbar-crumb">OFF-THE-SHELF LIBRARY <span class="sep">·</span> SELF CURATED</div>
+    </div>
+    <div class="brand-block">
+      <div class="brand-logo">
+        <svg width="34" height="34" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 8 L15 8 L20 16 L25 8 L35 8 L35 14 L28 14 L22 22 L28 30 L35 30 L35 36 L25 36 L20 28 L15 36 L5 36 L5 30 L12 30 L18 22 L12 14 L5 14 Z" fill="#F2B83A"/>
+        </svg>
+      </div>
+      <div class="brand-names">
+        <div class="name">MIKASA VENTURES</div>
+        <div class="tag">LEARNING PARTNER</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="eyebrow">LEARNING LIBRARY <span class="sep">·</span> 10 SERIES <span class="sep">·</span> 113 EPISODES</div>
+
+    <h1 class="display-hero">Off-The-Shelf <span class="accent">Library.</span></h1>
+
+    <p class="lede">Ready-to-deploy video modules for L&amp;D teams. Preview any episode inline — tap a row to watch.</p>
+
+    <div class="meta-divider"></div>
+    <div class="meta-row">
+      <div class="meta-item">
+        <div class="lbl">SERIES</div>
+        <div class="val">10</div>
+      </div>
+      <div class="meta-item">
+        <div class="lbl">EPISODES</div>
+        <div class="val">113</div>
+      </div>
+      <div class="meta-item">
+        <div class="lbl">TOTAL RUNTIME</div>
+        <div class="val">29h 23m</div>
+      </div>
+      <div class="meta-item">
+        <div class="lbl">FORMAT</div>
+        <div class="val">Preview + full module</div>
+      </div>
+    </div>
+
+    <div class="narrator">
+      <div class="narrator-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="narrator-body">
+        <div class="narrator-label">HOW TO BROWSE</div>
+        <div class="narrator-text">Tap a series to expand it. Tap any episode row to play a short preview inline. Custom curation for your team is available on request — use the button at the bottom to get in touch.</div>
+      </div>
+    </div>
+
+    <div id="series-list" style="margin-bottom: 3rem;"></div>
+
+    <div style="text-align: center; padding: 2.5rem 0; border-top: 1px solid var(--border); margin-bottom: 2rem;">
+      <p style="font-size: 14px; color: var(--text-muted); margin: 0 0 1.25rem;">Want a custom library curated for your team's needs?</p>
+      <a class="btn btn-primary" href="https://wa.me/919833362723?text=Hi%20Mikasa%20Ventures%2C%20I%27d%20like%20to%20learn%20more%20about%20your%20Off-The-Shelf%20Library.">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 21L3.5 16A9 9 0 1 1 7 19.5L2 21Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        Get in touch on WhatsApp
+      </a>
+    </div>
+
+  </main>
+
+  <footer class="statusbar">
+    <div class="statusbar-left">SERIES 10 <span style="margin: 0 10px; color: var(--text-dim);">·</span> <span id="ep-count">113 EPISODES</span></div>
+    <div class="statusbar-right">
+      <div class="pts-chip"><span class="dot"></span> 29H 23M</div>
+      <a href="whatsapp.html" class="nav-btn primary">Contact →</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const DEFAULT_TRAILER_ID = null;
+const trailerMap = {
+  "Basic Communication Skills": "1PC9FJEkJHJGIKKSsf4eM86SkXeYY7K0c",
+  "Building Empathy": "1PEcgbUeFkxZ365Vf52nPQ0nZrkSmefYZ",
+  "Business Correspondence": "1PKb9DFz2L2GuSDvag_S88tHvW5NCthEg",
+  "Communicating For Success": "1PM9PSRGGU_MyDpEWmfyjjDFXCEcgHHi8",
+  "Communication Skill — Improving Grammar": "1PMLZpj-Djpn9bcPzIIOqquMTFpyH8xmm",
+  "Effective Communication Skills": "1TnNH9NzUpuGrk7L2JXknkhOzZ7QtuFN7",
+  "Effective Listening Skills": "1T17uzgYfJVIfrIp7aT_khWbHzHb_2Jch",
+  "Effective Presentation Design": "1Xv7To-FBiEXod7_irMYy2sHxY3JRW2j1",
+  "Email Etiquette": "1PXINEKPnS-B-SrzkW3Qek5Ki2QUZwakh",
+  "English Communication Skills For Professionals": "1Peo0WQ02pNo12I4AZi9x6MTuNMe-e7FY",
+  "Positive Body Language": "1Q3F-qq8m2U0LZ-LmOxKVVG7eTqhHcDYT",
+  "Presentation Skills": "1T1zhldalACUf_3lTELxlu2PHwtmWgZev",
+  "Probing Skills": "1T81jmXBOLq4AWKBNKRHT47whiMKXuoN7",
+  "Speaking with Confidence": "1TMQfSRbwj2bh-brczQ6dImrtYp5Yip5q",
+  "Achieving Customer Service Excellence": "1PB1IxY8GtWLF1wVLnq9OgWvEon6nmvcc",
+  "Customer Centricity": "1TXbSu5lCyFvTI3qEfMh87JYjAKn4dQ8t",
+  "Customer Engagement": "1Ta56_IedxFPwTa_AslntljJQQyWq9NG9",
+  "Customer Handling Skills": "1Tgv16qtn4_UTlxfhZHB281LfrnHD9RN1",
+  "Customer Service Skills": "1Tg0Sp1eQ8E2s4lpI4eU4u63y5oPvwfvE",
+  "Cross Cultural Communication Skills": "1TalsmsZv_7KytkjP-a6LhXQHGSRXhDX4",
+  "Developing Self Awareness": "1Tku5t8GIK0SW8RIsXAjgmg2-0ct8OIFi",
+  "Diversity and Inclusion at Work": "1TjnR9eSzAfZT6TgWjo_8vHkLu67asbWP",
+  "Inclusive Language at Workplace": "1PoSeG6htXf17ciiP0E-TBTbvxUEvN3DZ",
+  "Invisible Disability at the Workplace": "1PgaP0jgco90i19ZGcFqLRZUhzD9M55QD",
+  "Mindfulness": "1Pxv_HG17fHo5aQdwHwUVWhx2q-lyp6vo",
+  "Overcoming Your Unconscious Bias": "1Q16hefLk99IOlSJc-bRlTjkl1G_W4DSc",
+  "Being a Change-maker": "1PDitEDEe9O8_xwjAksWX-j5XHddRCNym",
+  "Conflict Management": "1POK5qGaAYHQFLKqrXt5lElQ3XP7zGzFn",
+  "Dynamic Decision Making": "1TnaiDYYfnJPkI2tYrHig81JbZ3gnf7Fd",
+  "Effective Conflict Resolution Techniques": "1T1zThkGcwzj-PtOYqPnuhYpGjxJkxbSC",
+  "First Time Manager": "1PbD9E0mgoJ7ivtXeJIvpn-4FPyajBusz",
+  "Managing Conflict Of Interest At Workplace": "1PvTxzVaTKD9bpsEJFvK4fM6ZT_xjKS3O",
+  "Meeting Management": "1Py4dbFn5ysDHQnctwe_Q7KqSLfiEDX_B",
+  "Planning And Organizing": "1Q1SYiUSblvycgY-UIhAbPLPwdH5VGb-F",
+  "Preparing For End Of Year Performance Conversation": "1Xo2ildLn1sEH_V0ak-LB0XPG1CmFeyTc",
+  "Project Management": "1TDXGW_EZKrU7IkVcLMXg4cAfEwPqvh6h",
+  "Risk Management: Mitigating Workplace Risk": "1T7bEhCQWhXjh78zlzmKpTySIFZp8Kq1Q",
+  "Teamwork": "1TS2kZUURKMOTxnwSSG_OxxuklzVkyNLo",
+  "Unleash Your Motivation": "1TSNlFetJjIfZ7mykwiKzYz63iRD0Nfut",
+  "Interviewing Skills": "1G69YuBci7Lf8dnFIeNNctaM1jbpdZCS9",
+  "Generative AI: Transforming HR": "1H6ajpKHf_5xZDEY_ieQDAUAYjpEy7lku",
+  "Competency Based Interviewing Skills": "1yawQFwNWRzobpv4xZqm4LnM6Yxx9eddx",
+  "Lead Forward: Inclusive Leadership Quest": "1ex9B3MAqo3s0WZIXNVDsETDQCTyqD_Gm",
+  "Focus: Risk and Integrity": "1KWUZZAz8jDiStBwTIXrxrpeisPw5jpAr",
+  "Compassionate Leadership": "1PO-mtucbuSUjNV5iSEdL0pp05glHP_Db",
+  "Data Analysis and Interpretation": "1TeUK9l1U0aJoPxG1BEMoeuJRSESdQGV0",
+  "Data Analytics for Business": "1XsGThzo5uInYIJtzUrqQ3aya03wr8kdI",
+  "Leadership Styles To Enhance Productivity": "1PtTD6QSe0rU86FHutWkoZxWv0AVFk5qG",
+  "Strategic Planning": "1TPWzebTNJ3VUoNMzj-GouMAfNkfGoyOZ",
+  "Aspire to Inspire": "1PBu7vuD2FGJvmmxR2FBT3tZL4nU3WjF9",
+  "Campus to Corporate": "1PKy8pCatEDNqZVjfe2OQ3C3NPyAloBiQ",
+  "Change Management": "1PKyv34_lxNGuguWwyNQDWE75qrVxqDke",
+  "Cyber Security": "1Thu3mSw8AbPUwne8UTL7Rbl_NBo8o8lg",
+  "Finance for Non-Finance": "1PeU7YkDx29hyd0PY_GSMXs0BizL8rYNm",
+  "Goal Setting": "1Pjzs8OWiIEE1PpBn-8sLTFjhE8lA_PdD",
+  "How To Be An Ethical Leader": "1Po4Iv3YrpODQuuR-C6w8sQQS83h-9RQj",
+  "Interpersonal Skills": "1PrC3uYkr4qBWrO_iQMHl1ZmqHK7NuhQ_",
+  "Learning To Say No": "1Pt3tqdkTdTEz24FPQTsO56eJxx19DmoJ",
+  "Mastering The Art Of Receiving Feedback": "1Pv9kysWRPYqS9AI785s0JZ50k9LPqAmF",
+  "Meeting Etiquette": "1PyyIDYrESiYEUps5nzHrOV89h3oA1gAM",
+  "Setting Expectations At Workplace": "1TH-H-MpbP4pfhojr0mFc74vmBgA_WjXD",
+  "Sharpening the Saw": "1TG2XsDBz8Q824S4kss2UrIcIfhr-RQAG",
+  "Workplace Etiquette": "1TTyCwDMyIctY_KGwzlyTsWD-sohuXb1R",
+  "Workplace Health and Safety": "1TZeyunbZOT1ICQ9tVMmg326r2Qhmnnyw",
+  "Respect at Workplace": "1Zy2guYkXjWFkuqjoyykW7tGF7G-WYues",
+  "POSH": "1ZxqVarxqIEZBPt3gW7EFMxtMYrFrrW2q",
+  "Decision Making Techniques": "1ThCLQPzi3798wkJvQRKVXBDRzQBkW-zc",
+  "Effective Performance Feedback": "1Pa2SeIzsmB35c2VOTIPrL6Q101G6KKMb",
+  "Solving Problems As A Team": "1TMeyKD8ZEfSp_rkyAD77L4e191qc3QsW",
+  "Leadership Attributes": "1PqnRDNMYkevIwUdGPqHWFIJFBZPwmTHC",
+  "Managing Team Dynamics": "1Prl5YJbHU7V1Pok9rW4nhnNvWrfufGH-",
+  "Performance Management": "1Q31WDoYEoyc4Gh1cf4DUP6Lu40C9mpUw",
+  "Team Building: Fostering Collaboration & Success": "1TNUjDVwq-EnzPZ0W8cJsRcqrr0Jm6VWb",
+  "Business Process Improvement": "1PKomE0Gs_hkifKMqK_SetiqpMUBJZlNk",
+  "Continuous Improvement through the PDSA Cycle": "1PQLUFRCsEX1c86G6TJItTMsUbLgWUbQl",
+  "Design Thinking for Innovation": "1TlkLBxMll0JAZHscMDwWGlWMMGaLjHUK",
+  "Lean Management": "1PqS8lBpTvvGqCMeQHwYN9fgbKnvrmmkI",
+  "Quality Management": "1TCiGE5twWs0ejICXNaUbqT1DErZbIWmP",
+  "Building Customer Loyalty": "1PEJbYvsu0zTX1D5SZbHPox4w7pMTeWoN",
+  "Effective Persuasion": "1P_DJzaponEpMrjGEcFFRvqGVcUmBjz79",
+  "Effective Sales Presentation": "1P_9IiQpaBdXhzxt9L6ivcV9bqNqYeuUg",
+  "Essential Techniques for Negotiating a Sale": "1PXF-SqeodZkuil8x5Lvdj4kEYekI7QOs",
+  "Mastering The Art Of Successful Negotiation": "1PtTLCiDX6k_nG-i1Y-LYGdHvCPkEzbk7",
+  "Negotiation Skills": "1Q0AapSs40J_ufk6n5wNYOG-aiCQd2Sxa",
+  "Objection Handling Skills For Sales Associate": "1Q-lcjgFDIU8CFG35fya9XR8-N8ZGj0T4",
+  "Overcoming Procrastination": "1PzBZcm8J_triRjuFkPMTPra8cyH1sZpl",
+  "Storytelling In Sales": "1TL2qKsyGgFX6EhSrZVxyW08cikBhWcTk",
+  "Transitioning from Salesperson to Sales Manager": "1TTUY7vCRBhdUUdn3YH5fc8uRIRq6C8Cg",
+  "Stakeholder Mapping & Engagement": "1cD8gw2U6aMhj3Rc_ixLH3fnYyxsx6FXR",
+  "Relationship Building in B2B Sales": "1eltlKEZEG2sbvk-EHqU-iBoJwqJxvAJJ",
+  "Business Presentation": "12YnjieDfgtKCM-I0Kkr3fte6izcKJ-5m",
+  "Consultative Selling Techniques": "1b5dOpBk0RjoyP5YGryxxO27bJ7XZH11G",
+  "Action Planning": "1PAuaFWnA6wBUtjQEaiagMa6ody6x4j0y",
+  "Assertiveness: Key to Effective Communication": "1PBxV6KN8sSYgzvYcR7FPArBMNz7L4AYY",
+  "Being Proactive": "1PDuVNZCHQ-Q7110F7yj8k8mGJ2Hk1mWz",
+  "Building Resilience": "1PGGuZVZTp1y_oLEPAhf9dtT9_S6qe0ur",
+  "Circle of Influence": "1PL6JD9C0CkPharY4NxPxvRsHeURf0_cQ",
+  "Critical Thinking Skills": "1PRJvMhTfgV4WIUzeuAFS4wEXBM8rPOM3",
+  "Cultivating A Positive Attitude": "1TdM3r-poY5LdIWIe0CdEDegtK7nw23CN",
+  "Dealing With High Pressure Situation At Work": "1TQjWhegVtN2Kh5bbr4POqMuX52Com0yK",
+  "Effective Networking": "1T5FqJKkzVGAlLJPjw0rfmEd7v8arRzy1",
+  "Finding Balance: Art of Work Life Harmony": "1Pe9YWsGLG-CO35jt2o_oTW-UOoZ4RAqM",
+  "Growth Mindset": "1Phq29YtfYG0xCr_qflg-ul95T9QvIrfI",
+  "How To Set SMART KRAs For Yourself At Work": "1PnlYLKvirAYUI1m7Udf4t7Gr0ajp9kSA",
+  "Increasing Your Emotional Intelligence": "1PoAiPzWSLpBBF0OpLfPn4ltGChHmNpKd",
+  "Johari Window": "1PlGsi3TPyhElI-MaLk61wwN6E5QLiVlk",
+  "Logical Thinking": "1Pq0yX9SS8yZryS39geFnhJa93tjv1XuV",
+  "Mastering Remote Working": "1PvKl7eSnPL6sBenM4wsNTtCDzTgUNfax",
+  "Meeting 101: Unleashing Productivity & Collaboration": "1Pz09rxTnkR_n_qdDgHDUjWt9aQH2anEC",
+  "Stress Management": "1TOa_Fe_uPDnSnemqHwZ2fC9qE7G9lG-M",
+  "Time Management": "1TS2aXQ3pZKc7GndNJ9iacwfkpqm8WXMe",
+  "Why and How to Stop Multi-Tasking": "1TXXN1elk1f9tABRZELaSKyv0YkC0-Xoi",
+  "Cultural Sensitivity for Expats": "1Bx8BV8GCHkzvFD6dUHoElB4WP05BRF5_"
+};
+
+const data = [
+  { title: "Communication Series", count: 14, runtime: "3h 47m", eyebrow: "SERIES 01", episodes: [["Basic Communication Skills","12 min"],["Building Empathy","30 min"],["Business Correspondence","15 min"],["Communicating For Success","12 min"],["Communication Skill — Improving Grammar","20 min"],["Effective Communication Skills","12 min"],["Effective Listening Skills","20 min"],["Effective Presentation Design","12 min"],["Email Etiquette","15 min"],["English Communication Skills For Professionals","12 min"],["Positive Body Language","20 min"],["Presentation Skills","12 min"],["Probing Skills","20 min"],["Speaking with Confidence","15 min"]] },
+  { title: "Customer Management Series", count: 5, runtime: "1h 15m", eyebrow: "SERIES 02", episodes: [["Achieving Customer Service Excellence","15 min"],["Customer Centricity","15 min"],["Customer Engagement","15 min"],["Customer Handling Skills","15 min"],["Customer Service Skills","15 min"]] },
+  { title: "D&I and Wellbeing Series", count: 7, runtime: "1h 52m", eyebrow: "SERIES 03", episodes: [["Cross Cultural Communication Skills","15 min"],["Developing Self Awareness","15 min"],["Diversity and Inclusion at Work","20 min"],["Inclusive Language at Workplace","15 min"],["Invisible Disability at the Workplace","15 min"],["Mindfulness","12 min"],["Overcoming Your Unconscious Bias","20 min"]] },
+  { title: "First Time Manager Series", count: 18, runtime: "4h 42m", eyebrow: "SERIES 04", episodes: [["Being a Change-maker","15 min"],["Conflict Management","12 min"],["Dynamic Decision Making","12 min"],["Effective Conflict Resolution Techniques","15 min"],["First Time Manager","15 min"],["Managing Conflict Of Interest At Workplace","20 min"],["Meeting Management","12 min"],["Planning And Organizing","12 min"],["Preparing For End Of Year Performance Conversation","20 min"],["Project Management","15 min"],["Risk Management: Mitigating Workplace Risk","30 min"],["Teamwork","12 min"],["Unleash Your Motivation","20 min"],["Interviewing Skills","12 min"],["Generative AI: Transforming HR","15 min"],["Competency Based Interviewing Skills","15 min"],["Lead Forward: Inclusive Leadership Quest","15 min"],["Focus: Risk and Integrity","15 min"]] },
+  { title: "Leadership Series", count: 5, runtime: "1h 3m", eyebrow: "SERIES 05", episodes: [["Compassionate Leadership","12 min"],["Data Analysis and Interpretation","12 min"],["Data Analytics for Business","12 min"],["Leadership Styles To Enhance Productivity","12 min"],["Strategic Planning","15 min"]] },
+  { title: "New Joiner Series", count: 17, runtime: "4h 8m", eyebrow: "SERIES 06", episodes: [["Aspire to Inspire","15 min"],["Campus to Corporate","12 min"],["Change Management","12 min"],["Cyber Security","15 min"],["Finance for Non-Finance","20 min"],["Goal Setting","15 min"],["How To Be An Ethical Leader","15 min"],["Interpersonal Skills","12 min"],["Learning To Say No","15 min"],["Mastering The Art Of Receiving Feedback","15 min"],["Meeting Etiquette","15 min"],["Setting Expectations At Workplace","15 min"],["Sharpening the Saw","12 min"],["Workplace Etiquette","15 min"],["Workplace Health and Safety","15 min"],["Respect at Workplace","15 min"],["POSH","15 min"]] },
+  { title: "People Management Series", count: 7, runtime: "1h 42m", eyebrow: "SERIES 07", episodes: [["Decision Making Techniques","15 min"],["Effective Performance Feedback","15 min"],["Solving Problems As A Team","15 min"],["Leadership Attributes","12 min"],["Managing Team Dynamics","15 min"],["Performance Management","15 min"],["Team Building: Fostering Collaboration & Success","15 min"]] },
+  { title: "Quality Management Series", count: 5, runtime: "1h 15m", eyebrow: "SERIES 08", episodes: [["Business Process Improvement","15 min"],["Continuous Improvement through the PDSA Cycle","15 min"],["Design Thinking for Innovation","15 min"],["Lean Management","15 min"],["Quality Management","15 min"]] },
+  { title: "Sales Series", count: 14, runtime: "3h 57m", eyebrow: "SERIES 09", episodes: [["Building Customer Loyalty","12 min"],["Effective Persuasion","15 min"],["Effective Sales Presentation","15 min"],["Essential Techniques for Negotiating a Sale","15 min"],["Mastering The Art Of Successful Negotiation","15 min"],["Negotiation Skills","20 min"],["Objection Handling Skills For Sales Associate","15 min"],["Overcoming Procrastination","20 min"],["Storytelling In Sales","30 min"],["Transitioning from Salesperson to Sales Manager","20 min"],["Stakeholder Mapping & Engagement","15 min"],["Relationship Building in B2B Sales","15 min"],["Business Presentation","15 min"],["Consultative Selling Techniques","15 min"]] },
+  { title: "Self Improvement Series", count: 21, runtime: "5h 42m", eyebrow: "SERIES 10", episodes: [["Action Planning","15 min"],["Assertiveness: Key to Effective Communication","15 min"],["Being Proactive","15 min"],["Building Resilience","15 min"],["Circle of Influence","15 min"],["Critical Thinking Skills","30 min"],["Cultivating A Positive Attitude","15 min"],["Dealing With High Pressure Situation At Work","15 min"],["Effective Networking","25 min"],["Finding Balance: Art of Work Life Harmony","15 min"],["Growth Mindset","20 min"],["How To Set SMART KRAs For Yourself At Work","15 min"],["Increasing Your Emotional Intelligence","15 min"],["Johari Window","15 min"],["Logical Thinking","15 min"],["Mastering Remote Working","15 min"],["Meeting 101: Unleashing Productivity & Collaboration","12 min"],["Stress Management","15 min"],["Time Management","15 min"],["Why and How to Stop Multi-Tasking","15 min"],["Cultural Sensitivity for Expats","15 min"]] }
+];
+
+const root = document.getElementById("series-list");
+let activeTrailer = null;
+
+function closeTrailer() {
+  if (!activeTrailer) return;
+  const { row, frame } = activeTrailer;
+  frame.classList.remove("open");
+  frame.querySelector(".trailer-inner").innerHTML = "";
+  row.classList.remove("playing");
+  activeTrailer = null;
+}
+
+function openTrailer(row, frame, fileId, title) {
+  closeTrailer();
+  const inner = frame.querySelector(".trailer-inner");
+  inner.innerHTML = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" allow="autoplay; encrypted-media" allowfullscreen title="${title} trailer"></iframe>`;
+  frame.classList.add("open");
+  row.classList.add("playing");
+  activeTrailer = { row, frame };
+  frame.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+data.forEach((s, i) => {
+  const num = String(i + 1).padStart(2, "0");
+  const seriesEl = document.createElement("div");
+  seriesEl.className = "series";
+
+  const episodesHtml = s.episodes.map(([title, dur], idx) => {
+    const fileId = trailerMap[title] || DEFAULT_TRAILER_ID;
+    const hasTrailer = !!fileId;
+    const safeTitle = title.replace(/"/g, "&quot;");
+    return `
+      <div class="episode" data-file-id="${fileId || ""}" data-title="${safeTitle}">
+        <div class="play">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M1 0L9 5L1 10Z"/></svg>
+        </div>
+        <div class="episode-idx">${String(idx + 1).padStart(2, "0")}</div>
+        <div class="episode-title">${title}${hasTrailer ? '<span class="badge-preview">PREVIEW</span>' : ""}</div>
+        <div class="episode-dur">${dur}</div>
+      </div>
+      <div class="trailer-frame">
+        <div class="trailer-label">
+          <span>TRAILER · ${safeTitle.toUpperCase()}</span>
+          <button class="trailer-close" type="button">Close</button>
+        </div>
+        <div class="trailer-inner"></div>
+      </div>
+    `;
+  }).join("");
+
+  seriesEl.innerHTML = `
+    <div class="series-header">
+      <div class="series-num">${num}</div>
+      <div class="series-meta">
+        <div class="series-eyebrow">${s.eyebrow}</div>
+        <div class="series-title">${s.title}</div>
+      </div>
+      <div class="series-right">
+        <div class="series-stats">
+          <div class="count">${s.count} episodes</div>
+          <div>${s.runtime}</div>
+        </div>
+        <svg class="chevron" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="episodes">${episodesHtml}</div>
+  `;
+
+  seriesEl.querySelector(".series-header").addEventListener("click", () => {
+    seriesEl.classList.toggle("expanded");
+    if (!seriesEl.classList.contains("expanded")) closeTrailer();
+  });
+
+  seriesEl.querySelectorAll(".episode").forEach((row) => {
+    const frame = row.nextElementSibling;
+    const fileId = row.dataset.fileId;
+    const title = row.dataset.title;
+    if (!fileId) return;
+    row.addEventListener("click", () => {
+      if (activeTrailer && activeTrailer.row === row) closeTrailer();
+      else openTrailer(row, frame, fileId, title);
+    });
+    frame.querySelector(".trailer-close").addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeTrailer();
+    });
+  });
+
+  root.appendChild(seriesEl);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mikasa Ventures — WhatsApp Message Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mikasa.css">
+<style>
+  .work-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+  }
+  @media (max-width: 860px) { .work-grid { grid-template-columns: 1fr; gap: 2rem; } }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.875rem;
+  }
+
+  .field { margin-bottom: 1rem; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.15s ease;
+  }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .tone-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+  .tone-opt {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tone-opt:hover { border-color: var(--border-strong); }
+  .tone-opt.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .tone-opt .name {
+    font-weight: 700;
+    font-size: 13px;
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text);
+  }
+  .tone-opt .desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+  .tone-opt.active .desc { color: var(--accent-deep); }
+
+  .preview-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    font-size: 14px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    color: var(--text);
+    min-height: 340px;
+    word-wrap: break-word;
+    font-family: var(--font-sans);
+  }
+  .char-count {
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+  .btn.disabled {
+    background: var(--bg-muted);
+    color: var(--text-dim);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .btn-wa {
+    background: #25D366;
+    color: #FFF;
+    flex: 1;
+    min-width: 200px;
+  }
+  .btn-wa:hover { background: #1DA851; }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: #FFF;
+    padding: 11px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="page-shell">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="mark"></div>
+      <div class="topbar-crumb">SALES TOOL <span class="sep">·</span> WHATSAPP GENERATOR</div>
+    </div>
+    <div class="brand-block">
+      <div class="brand-logo">
+        <svg width="34" height="34" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 8 L15 8 L20 16 L25 8 L35 8 L35 14 L28 14 L22 22 L28 30 L35 30 L35 36 L25 36 L20 28 L15 36 L5 36 L5 30 L12 30 L18 22 L12 14 L5 14 Z" fill="#F2B83A"/>
+        </svg>
+      </div>
+      <div class="brand-names">
+        <div class="name">MIKASA VENTURES</div>
+        <div class="tag">LEARNING PARTNER</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="eyebrow">INTERNAL TOOL <span class="sep">·</span> PROSPECT OUTREACH</div>
+
+    <h1 class="display-hero">WhatsApp <span class="accent">Generator.</span></h1>
+
+    <p class="lede">Fill in prospect details — get a click-ready WhatsApp link with the full message pre-filled. Match the tone to the moment.</p>
+
+    <div class="meta-divider"></div>
+    <div class="meta-row">
+      <div class="meta-item">
+        <div class="lbl">INPUT</div>
+        <div class="val">Prospect details</div>
+      </div>
+      <div class="meta-item">
+        <div class="lbl">OUTPUT</div>
+        <div class="val">wa.me link</div>
+      </div>
+      <div class="meta-item">
+        <div class="lbl">TEMPLATES</div>
+        <div class="val">3 tones</div>
+      </div>
+    </div>
+
+    <div class="narrator">
+      <div class="narrator-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="narrator-body">
+        <div class="narrator-label">HOW IT WORKS</div>
+        <div class="narrator-text">Fill in the prospect's name and WhatsApp number. Pick a tone. The preview updates live on the right. Click "Open in WhatsApp" and the message is ready to send. You can also bookmark this page with <span style="font-family: var(--font-mono); background: var(--bg-muted); padding: 1px 6px; border-radius: 3px;">?name=...&amp;phone=...</span> to skip typing.</div>
+      </div>
+    </div>
+
+    <div class="work-grid">
+
+      <div>
+        <div class="section-label">Prospect details</div>
+        <div class="field">
+          <label>Name *</label>
+          <input type="text" id="name" placeholder="e.g. Rakesh" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <input type="text" id="role" placeholder="e.g. Head of L&amp;D" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Company</label>
+          <input type="text" id="company" placeholder="e.g. Souled Store" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>WhatsApp number (with country code) *</label>
+          <input type="tel" id="phone" placeholder="e.g. 919833362723" autocomplete="off">
+          <div class="hint">Numbers only. No + or spaces. India = 91XXXXXXXXXX</div>
+        </div>
+
+        <div class="section-label" style="margin-top: 1.75rem;">Context (optional)</div>
+        <div class="field">
+          <label>Prior interaction</label>
+          <input type="text" id="context" placeholder="e.g. SLA signed but went cold" autocomplete="off">
+          <div class="hint">A short phrase. Inserted into the warm tone message.</div>
+        </div>
+
+        <div class="section-label" style="margin-top: 1.75rem;">Message tone</div>
+        <div class="tone-group" id="tones">
+          <div class="tone-opt active" data-tone="warm">
+            <span class="name">Warm</span>
+            <span class="desc">Re-engagement</span>
+          </div>
+          <div class="tone-opt" data-tone="direct">
+            <span class="name">Direct</span>
+            <span class="desc">Fresh outreach</span>
+          </div>
+          <div class="tone-opt" data-tone="short">
+            <span class="name">Short</span>
+            <span class="desc">Link-first</span>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top: 1.75rem;">Your details</div>
+        <div class="field">
+          <label>Your name (signature)</label>
+          <input type="text" id="sender" placeholder="e.g. Priya" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Library page URL</label>
+          <input type="url" id="libraryUrl" placeholder="https://yourdomain.com/library.html" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Pitch card URL (optional)</label>
+          <input type="url" id="pitchUrl" placeholder="https://yourdomain.com/" autocomplete="off">
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Message preview</div>
+        <div class="preview-box" id="preview">Fill in the prospect's name to get started…</div>
+        <div class="char-count"><span id="charCount">0</span> characters</div>
+
+        <div class="actions">
+          <a class="btn btn-wa disabled" id="sendBtn" target="_blank" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M2 21L3.5 16A9 9 0 1 1 7 19.5L2 21Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            Open in WhatsApp
+          </a>
+          <button class="btn btn-ghost" id="copyBtn" type="button">Copy message</button>
+        </div>
+
+        <div class="hint" style="margin-top: 14px;">Clicking "Open in WhatsApp" launches WhatsApp Web or the app with the recipient's number pre-loaded and this message pre-filled. You still click Send.</div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="statusbar">
+    <div class="statusbar-left">TOOL 01 OF 01 <span style="margin: 0 10px; color: var(--text-dim);">·</span> MIKASA SALES KIT</div>
+    <div class="statusbar-right">
+      <a href="index.html" class="nav-btn">← Pitch</a>
+      <a href="library.html" class="nav-btn primary">Library →</a>
+    </div>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const inputs = ["name","role","company","phone","context","sender","libraryUrl","pitchUrl"];
+let tone = "warm";
+
+document.querySelectorAll(".tone-opt").forEach(opt => {
+  opt.addEventListener("click", () => {
+    document.querySelectorAll(".tone-opt").forEach(o => o.classList.remove("active"));
+    opt.classList.add("active");
+    tone = opt.dataset.tone;
+    render();
+  });
+});
+
+function buildWarm(v) {
+  const greeting = v.name ? `Hi ${v.name},` : "Hi,";
+  const contextLine = v.context
+    ? `I know things went quiet after ${v.context} — wanted to circle back with two things worth a quick look.`
+    : `Wanted to share two things from Mikasa that might be relevant for ${v.company || "your team"}.`;
+  let msg = `${greeting}\n\n${contextLine}\n\nSince we last connected, two things changed at Mikasa:\n• Same-day module delivery for urgent L&D rollouts\n• 100+ hours of video content turned around in 48 hours\n\n`;
+  if (v.libraryUrl) msg += `Our full Off-The-Shelf Library (113 episodes, 10 series):\n${v.libraryUrl}\n\n`;
+  if (v.pitchUrl) msg += `A short note written for you:\n${v.pitchUrl}\n\n`;
+  msg += `Worth a 15-min call to reassess? If priorities have shifted, even a line back so I know where to park it would mean a lot.\n\n`;
+  msg += v.sender ? `— ${v.sender}\nMikasa Ventures` : `— Mikasa Ventures`;
+  return msg;
+}
+function buildDirect(v) {
+  const greeting = v.name ? `Hi ${v.name},` : "Hi,";
+  let msg = `${greeting}\n\nReaching out from Mikasa Ventures — we produce ready-to-deploy L&D content at scale.\n\nTwo capabilities worth knowing:\n• Same-day module delivery\n• 100+ hours of content in 48 hours\n\n`;
+  if (v.libraryUrl) msg += `Our Off-The-Shelf Library (113 episodes across 10 series):\n${v.libraryUrl}\n\n`;
+  if (v.pitchUrl) msg += `More on what we do:\n${v.pitchUrl}\n\n`;
+  const targetCompany = v.company ? ` at ${v.company}` : "";
+  msg += `If L&D content is on your roadmap${targetCompany}, worth a 15-min call?\n\n`;
+  msg += v.sender ? `— ${v.sender}\nMikasa Ventures` : `— Mikasa Ventures`;
+  return msg;
+}
+function buildShort(v) {
+  const greeting = v.name ? `Hey ${v.name},` : "Hey,";
+  let msg = `${greeting}\n\nTwo things from Mikasa Ventures:\n\n`;
+  if (v.libraryUrl) msg += `Our Off-The-Shelf Library (113 episodes): ${v.libraryUrl}\n`;
+  if (v.pitchUrl) msg += `A quick note for you: ${v.pitchUrl}\n`;
+  if (!v.libraryUrl && !v.pitchUrl) msg += `Same-day module delivery, 100+ hours in 48 hours.\n`;
+  msg += `\nSame-day module delivery. 100+ hours in 48 hours. Worth a chat?\n\n`;
+  msg += v.sender ? `— ${v.sender}, Mikasa Ventures` : `— Mikasa Ventures`;
+  return msg;
+}
+
+const builders = { warm: buildWarm, direct: buildDirect, short: buildShort };
+
+function getValues() {
+  const v = {};
+  inputs.forEach(id => v[id] = $(id).value.trim());
+  return v;
+}
+function cleanPhone(raw) { return (raw || "").replace(/\D/g, ""); }
+
+function render() {
+  const v = getValues();
+  const msg = builders[tone](v);
+  $("preview").textContent = msg;
+  $("charCount").textContent = msg.length;
+  const phone = cleanPhone(v.phone);
+  const sendBtn = $("sendBtn");
+  if (phone && v.name) {
+    sendBtn.href = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    sendBtn.classList.remove("disabled");
+  } else {
+    sendBtn.removeAttribute("href");
+    sendBtn.classList.add("disabled");
+  }
+}
+
+inputs.forEach(id => $(id).addEventListener("input", render));
+
+$("copyBtn").addEventListener("click", async () => {
+  const msg = $("preview").textContent;
+  if (!msg || msg.startsWith("Fill in")) return;
+  try {
+    await navigator.clipboard.writeText(msg);
+    const toast = $("toast");
+    toast.textContent = "Copied to clipboard";
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1800);
+  } catch (err) {
+    alert("Couldn't copy — please select the text manually.");
+  }
+});
+
+(function prefill() {
+  const params = new URLSearchParams(window.location.search);
+  inputs.forEach(id => { if (params.has(id)) $(id).value = params.get(id); });
+  if (params.has("tone") && ["warm","direct","short"].includes(params.get("tone"))) {
+    tone = params.get("tone");
+    document.querySelectorAll(".tone-opt").forEach(o => o.classList.toggle("active", o.dataset.tone === tone));
+  }
+  render();
+})();
+</script>
+
+</body>
+</html>
