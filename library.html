@@ -4,288 +4,591 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mikasa Ventures — Off-The-Shelf Library</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="mikasa.css">
+<meta name="description" content="113 episodes across 10 series — ready-to-deploy learning content from Mikasa Ventures.">
+<meta property="og:title" content="Mikasa Ventures — Off-The-Shelf Library">
+<meta property="og:description" content="113 episodes · 10 series · 29h 23m of ready-to-deploy learning content.">
 <style>
-  .series {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    margin-bottom: 12px;
+  :root {
+    --bg-panel: #1A1A1A;
+    --bg-card: #1F1F1F;
+    --bg-card-hover: #232323;
+    --bg-input: #0E0E0E;
+    --text: #F5F5F5;
+    --text-muted: #A8A8A8;
+    --text-dim: #7A7A7A;
+    --accent: #E63946;
+    --accent-hover: #D02836;
+    --accent-soft: rgba(230, 57, 70, 0.12);
+    --border: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #000;
+    font-family: var(--font-sans);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem 3rem;
+  }
+  .panel {
+    background: var(--bg-panel);
+    border-radius: var(--radius-md);
     overflow: hidden;
+  }
+
+  /* ----- Header (same as Humanexity-style) ----- */
+  .panel-header {
+    background: #0A0A0A;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-text {
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.04em; line-height: 1.1;
+  }
+  .brand-text .accent { color: var(--accent); }
+  .brand-tag {
+    font-size: 9px; letter-spacing: 0.15em;
+    color: var(--text-dim); margin-top: 2px;
+  }
+  .divider-v { width: 1px; height: 40px; background: var(--border); }
+  .header-title {
+    font-size: 18px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin: 0 0 4px;
+  }
+  .header-meta {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px;
+  }
+  .header-meta .count { color: var(--accent); font-weight: 500; }
+  .header-meta .sep { color: var(--text-dim); }
+  .header-meta .label { color: var(--text-muted); }
+  .header-stats {
+    margin-left: auto;
+    display: flex; gap: 1.5rem; align-items: center;
+  }
+  .stat { text-align: right; }
+  .stat-num { font-size: 20px; font-weight: 700; line-height: 1; }
+  .stat-lbl {
+    font-size: 10px; letter-spacing: 0.15em;
+    color: var(--text-dim); text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ----- Grid body ----- */
+  .panel-body { padding: 1.5rem; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 820px)  { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px)  { .grid { grid-template-columns: 1fr; } }
+
+  /* ----- Series box ----- */
+  .box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
     transition: border-color 0.15s ease;
   }
-  .series.expanded { border-color: var(--border-strong); }
-  .series-header {
-    display: flex;
-    align-items: center;
-    padding: 18px 22px;
-    gap: 18px;
-    cursor: pointer;
-    background: var(--surface);
-    transition: background 0.15s ease;
-  }
-  .series-header:hover { background: var(--bg-muted); }
-  .series-num {
-    font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 28px;
-    color: var(--accent);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    width: 44px;
+  .box:hover { border-color: var(--border-strong); }
+  .box-head { display: flex; align-items: flex-start; gap: 10px; }
+  .box-num {
+    width: 30px; height: 30px;
+    background: var(--accent);
+    color: #FFF;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
     flex-shrink: 0;
   }
-  .series-meta { flex: 1; min-width: 0; }
-  .series-eyebrow {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 4px;
+  .box-title-wrap { flex: 1; min-width: 0; }
+  .box-title {
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 0 0 4px;
+    line-height: 1.3;
   }
-  .series-title {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 22px;
+  .box-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .box-meta .accent { color: var(--accent); font-weight: 600; }
+
+  /* ----- Dropdown ----- */
+  .ep-select {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     color: var(--text);
-    letter-spacing: -0.01em;
-    line-height: 1.15;
+    padding: 9px 10px;
+    font-size: 12.5px;
+    font-family: inherit;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23A8A8A8' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
   }
-  .series-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-shrink: 0;
+  .ep-select:focus { outline: none; border-color: var(--accent); }
+  .ep-select option { background: var(--bg-input); color: var(--text); }
+
+  /* ----- Summary + trailer trigger ----- */
+  .ep-detail {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    display: none;
   }
-  .series-stats {
-    text-align: right;
+  .ep-detail.show { display: block; }
+  .ep-summary {
     font-size: 12px;
+    line-height: 1.5;
     color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+  .ep-actions { display: flex; align-items: center; gap: 8px; }
+  .play-btn {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    font-size: 11.5px;
     font-weight: 600;
     letter-spacing: 0.04em;
-  }
-  .series-stats .count {
-    color: var(--text);
-    font-weight: 800;
-    font-size: 15px;
-    font-family: var(--font-display);
-  }
-  .chevron {
-    width: 20px; height: 20px;
-    color: var(--text-muted);
-    transition: transform 0.2s ease;
-  }
-  .series.expanded .chevron { transform: rotate(180deg); color: var(--accent); }
-
-  .episodes {
-    display: none;
-    border-top: 1px solid var(--border);
-    background: var(--bg-muted);
-  }
-  .series.expanded .episodes { display: block; }
-
-  .episode {
-    display: flex;
-    align-items: center;
-    padding: 14px 22px 14px 70px;
-    gap: 14px;
-    border-bottom: 1px solid var(--border);
     cursor: pointer;
-    background: transparent;
-    transition: background 0.15s ease;
-  }
-  .episode:last-child { border-bottom: 0; }
-  .episode:hover { background: var(--bg); }
-  .episode.playing { background: var(--accent-soft); }
-  .play {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    background: var(--surface);
-    border: 1px solid var(--border-strong);
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    flex-shrink: 0;
+    gap: 6px;
+    font-family: inherit;
     transition: all 0.15s ease;
   }
-  .episode:hover .play { border-color: var(--accent); color: var(--accent); }
-  .episode.playing .play {
+  .play-btn:hover {
     background: var(--accent);
-    border-color: var(--accent);
     color: #FFF;
   }
-  .episode-idx {
-    font-family: var(--font-mono);
-    font-size: 12px;
+  .ep-duration {
+    margin-left: auto;
+    font-size: 11px;
     color: var(--text-dim);
-    font-weight: 600;
-    width: 24px;
-    flex-shrink: 0;
-  }
-  .episode-title {
-    font-size: 14.5px;
-    color: var(--text);
-    font-weight: 500;
-    flex: 1;
-  }
-  .badge-preview {
-    display: inline-block;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    background: var(--accent-soft);
-    padding: 3px 7px;
-    border-radius: 3px;
-    margin-left: 10px;
-    vertical-align: middle;
-  }
-  .episode-dur {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-muted);
-    flex-shrink: 0;
-    font-weight: 500;
+    font-variant-numeric: tabular-nums;
   }
 
+  /* ----- Inline trailer player (mobile only — desktop uses modal) ----- */
   .trailer-frame {
     display: none;
-    padding: 0 22px 20px 70px;
-    background: var(--bg-muted);
-    border-bottom: 1px solid var(--border);
+    margin-top: 10px;
   }
   .trailer-frame.open { display: block; }
-  .trailer-label {
+  .trailer-inner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .trailer-inner iframe { width: 100%; height: 100%; border: 0; }
+  .trailer-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .trailer-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.08em;
+  }
+  .trailer-close:hover { color: var(--text); border-color: var(--text-muted); }
+
+  /* ----- Modal overlay (desktop) ----- */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 2rem;
+    animation: fade-in 0.2s ease;
+  }
+  .modal-backdrop.open { display: flex; }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .modal-shell {
+    width: min(960px, 100%);
+    max-height: 90vh;
+    background: var(--bg-panel);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    display: flex;
+    flex-direction: column;
+    animation: slide-up 0.25s ease;
+  }
+  @keyframes slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin: 4px 0 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: #0A0A0A;
   }
-  .trailer-close {
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    color: var(--text-muted);
+  .modal-title-wrap { min-width: 0; flex: 1; }
+  .modal-eyebrow {
     font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 5px 12px;
-    border-radius: var(--radius-pill);
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .modal-close {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     cursor: pointer;
     font-family: inherit;
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 12px;
+    transition: background 0.15s ease;
   }
-  .trailer-close:hover { color: var(--text); background: var(--surface); }
-  .trailer-inner {
+  .modal-close:hover { background: rgba(255, 255, 255, 0.16); }
+  .modal-video-wrap {
+    position: relative;
     width: 100%;
-    max-width: 780px;
     aspect-ratio: 16 / 9;
     background: #000;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: 1px solid var(--border);
   }
-  .trailer-inner iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .modal-video-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .modal-summary {
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    border-top: 1px solid var(--border);
+  }
+
+  /* On mobile, fall back to inline expansion — hide the modal even if triggered */
+  @media (max-width: 720px) {
+    .modal-backdrop.open { display: none; }
+  }
+
+  /* ----- Footer CTA ----- */
+  .cta-block {
+    text-align: center;
+    padding: 1.75rem 1rem 0.5rem;
+  }
+  .cta-caption {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 12px;
+  }
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #FFF;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s ease;
+  }
+  .cta-btn:hover { background: var(--accent-hover); }
 
   @media (max-width: 720px) {
-    .episode { padding-left: 22px; }
-    .trailer-frame { padding-left: 22px; }
-    .series-num { font-size: 22px; width: 36px; }
-    .series-title { font-size: 18px; }
+    .panel-header { flex-wrap: wrap; padding: 1rem; gap: 0.75rem; }
+    .divider-v { display: none; }
+    .header-stats {
+      width: 100%;
+      margin-left: 0;
+      justify-content: space-between;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+    .stat { text-align: left; }
+    .header-title { font-size: 15px; }
+    .panel-body { padding: 1rem; }
   }
 </style>
 </head>
 <body>
 
-<div class="page-shell">
+<main class="page">
+  <div class="panel">
 
-  <header class="topbar">
-    <div class="topbar-left">
-      <div class="mark"></div>
-      <div class="topbar-crumb">OFF-THE-SHELF LIBRARY <span class="sep">·</span> SELF CURATED</div>
+    <div class="panel-header">
+      <div class="brand">
+        <img src="data:image/png;base64,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" alt="Mikasa Ventures" width="40" height="32" style="flex-shrink: 0;">
+        <div>
+          <div class="brand-text">MIKASA <span class="accent">VENTURES</span></div>
+          <div class="brand-tag">LEARNING ECOSYSTEM CREATOR</div>
+        </div>
+      </div>
+      <div class="divider-v"></div>
+      <div>
+        <h1 class="header-title">Off-The-Shelf Library</h1>
+        <div class="header-meta">
+          <span class="count">113 Episodes</span>
+          <span class="sep">|</span>
+          <span class="label">Self Curated Library</span>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat"><div class="stat-num">10</div><div class="stat-lbl">Series</div></div>
+        <div class="stat"><div class="stat-num">113</div><div class="stat-lbl">Episodes</div></div>
+        <div class="stat"><div class="stat-num">29h 23m</div><div class="stat-lbl">Runtime</div></div>
+      </div>
     </div>
-    <div class="brand-block">
-      <div class="brand-logo">
-        <svg width="34" height="34" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <path d="M5 8 L15 8 L20 16 L25 8 L35 8 L35 14 L28 14 L22 22 L28 30 L35 30 L35 36 L25 36 L20 28 L15 36 L5 36 L5 30 L12 30 L18 22 L12 14 L5 14 Z" fill="#F2B83A"/>
+
+    <div class="panel-body">
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="cta-block">
+      <p class="cta-caption">Interested in curating a custom library for your team? Get in touch.</p>
+      <a class="cta-btn" href="https://wa.me/919833362723?text=Hi%20Mikasa%20Ventures%2C%20I%27d%20like%20to%20learn%20more%20about%20your%20Off-The-Shelf%20Library.">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 21L3.5 16A9 9 0 1 1 7 19.5L2 21Z" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
         </svg>
-      </div>
-      <div class="brand-names">
-        <div class="name">MIKASA VENTURES</div>
-        <div class="tag">LEARNING PARTNER</div>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <div class="eyebrow">LEARNING LIBRARY <span class="sep">·</span> 10 SERIES <span class="sep">·</span> 113 EPISODES</div>
-
-    <h1 class="display-hero">Off-The-Shelf <span class="accent">Library.</span></h1>
-
-    <p class="lede">Ready-to-deploy video modules for L&amp;D teams. Preview any episode inline — tap a row to watch.</p>
-
-    <div class="meta-divider"></div>
-    <div class="meta-row">
-      <div class="meta-item">
-        <div class="lbl">SERIES</div>
-        <div class="val">10</div>
-      </div>
-      <div class="meta-item">
-        <div class="lbl">EPISODES</div>
-        <div class="val">113</div>
-      </div>
-      <div class="meta-item">
-        <div class="lbl">TOTAL RUNTIME</div>
-        <div class="val">29h 23m</div>
-      </div>
-      <div class="meta-item">
-        <div class="lbl">FORMAT</div>
-        <div class="val">Preview + full module</div>
-      </div>
-    </div>
-
-    <div class="narrator">
-      <div class="narrator-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="narrator-body">
-        <div class="narrator-label">HOW TO BROWSE</div>
-        <div class="narrator-text">Tap a series to expand it. Tap any episode row to play a short preview inline. Custom curation for your team is available on request — use the button at the bottom to get in touch.</div>
-      </div>
-    </div>
-
-    <div id="series-list" style="margin-bottom: 3rem;"></div>
-
-    <div style="text-align: center; padding: 2.5rem 0; border-top: 1px solid var(--border); margin-bottom: 2rem;">
-      <p style="font-size: 14px; color: var(--text-muted); margin: 0 0 1.25rem;">Want a custom library curated for your team's needs?</p>
-      <a class="btn btn-primary" href="https://wa.me/919833362723?text=Hi%20Mikasa%20Ventures%2C%20I%27d%20like%20to%20learn%20more%20about%20your%20Off-The-Shelf%20Library.">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 21L3.5 16A9 9 0 1 1 7 19.5L2 21Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-        Get in touch on WhatsApp
+        Get in Touch
       </a>
     </div>
 
-  </main>
+  </div>
+</main>
 
-  <footer class="statusbar">
-    <div class="statusbar-left">SERIES 10 <span style="margin: 0 10px; color: var(--text-dim);">·</span> <span id="ep-count">113 EPISODES</span></div>
-    <div class="statusbar-right">
-      <div class="pts-chip"><span class="dot"></span> 29H 23M</div>
-      <a href="whatsapp.html" class="nav-btn primary">Contact →</a>
+<!-- Shared modal for desktop trailer playback -->
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal-shell" role="document">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <div class="modal-eyebrow" id="modalEyebrow">Series</div>
+        <div class="modal-title" id="modalTitle">Trailer</div>
+      </div>
+      <button class="modal-close" type="button" id="modalClose" aria-label="Close trailer">×</button>
     </div>
-  </footer>
-
+    <div class="modal-video-wrap" id="modalVideoWrap"></div>
+    <div class="modal-summary" id="modalSummary"></div>
+  </div>
 </div>
 
 <script>
-const DEFAULT_TRAILER_ID = null;
+// =============================================================
+// EPISODE SUMMARIES — edit any of these freely.
+// Each value is the 1-line description shown when an episode
+// is selected from the dropdown. Keep them ~10-20 words.
+// =============================================================
+const summaries = {
+  // Communication Series
+  "Basic Communication Skills": "Foundation skills for clear, confident workplace communication across written and spoken contexts.",
+  "Building Empathy": "Practical techniques to understand others' perspectives and build stronger workplace relationships.",
+  "Business Correspondence": "Crafting professional emails, memos, and letters that get read and acted on.",
+  "Communicating For Success": "Communication strategies that drive influence, alignment, and career outcomes.",
+  "Communication Skill — Improving Grammar": "Sharpen written grammar to project credibility in business writing.",
+  "Effective Communication Skills": "Core principles for delivering messages with clarity, confidence, and impact.",
+  "Effective Listening Skills": "Active listening techniques that improve understanding and reduce miscommunication.",
+  "Effective Presentation Design": "Designing slides that support — not distract from — your spoken message.",
+  "Email Etiquette": "Professional email norms covering tone, structure, and appropriate response times.",
+  "English Communication Skills For Professionals": "Refining business English for confident participation in global workplaces.",
+  "Positive Body Language": "Reading and using non-verbal cues to project confidence and openness.",
+  "Presentation Skills": "Delivering memorable presentations through structure, voice, and audience engagement.",
+  "Probing Skills": "Asking the right questions to uncover real needs and surface root causes.",
+  "Speaking with Confidence": "Building presence and overcoming hesitation in high-stakes speaking situations.",
+
+  // Customer Management Series
+  "Achieving Customer Service Excellence": "Service standards and behaviours that turn customers into advocates.",
+  "Customer Centricity": "Putting customer needs at the heart of every decision and interaction.",
+  "Customer Engagement": "Creating meaningful interactions that build long-term customer loyalty.",
+  "Customer Handling Skills": "Managing difficult conversations and resolving issues with composure and care.",
+  "Customer Service Skills": "Core service competencies for front-line and support roles.",
+
+  // D&I and Wellbeing Series
+  "Cross Cultural Communication Skills": "Navigating cultural differences for effective communication in global teams.",
+  "Developing Self Awareness": "Understanding your own behaviours, triggers, and impact on those around you.",
+  "Diversity and Inclusion at Work": "Building inclusive teams where every voice is heard and valued.",
+  "Inclusive Language at Workplace": "Words and phrases that signal respect and belonging across all identities.",
+  "Invisible Disability at the Workplace": "Recognising and supporting colleagues with non-visible disabilities.",
+  "Mindfulness": "Practical mindfulness techniques for focus, calm, and resilience at work.",
+  "Overcoming Your Unconscious Bias": "Identifying hidden biases and building habits that lead to fairer decisions.",
+
+  // First Time Manager Series
+  "Being a Change-maker": "Leading change initiatives with clarity, empathy, and momentum.",
+  "Conflict Management": "Navigating workplace tensions to reach productive resolutions.",
+  "Dynamic Decision Making": "Making sound decisions under pressure with limited information.",
+  "Effective Conflict Resolution Techniques": "Frameworks and scripts for resolving disagreements constructively.",
+  "First Time Manager": "The mindset shifts and skills first-time managers need to lead well.",
+  "Managing Conflict Of Interest At Workplace": "Recognising and handling conflicts of interest with transparency.",
+  "Meeting Management": "Running meetings that respect time and produce clear outcomes.",
+  "Planning And Organizing": "Structuring your work and your team's for predictable delivery.",
+  "Preparing For End Of Year Performance Conversation": "Preparing for performance reviews so they're useful, not stressful.",
+  "Project Management": "Foundational project management skills for delivering on time and within scope.",
+  "Risk Management: Mitigating Workplace Risk": "Identifying and mitigating common operational and people risks at work.",
+  "Teamwork": "What strong teams do differently — collaboration, trust, and shared accountability.",
+  "Unleash Your Motivation": "Tapping into intrinsic motivation to sustain high performance.",
+  "Interviewing Skills": "Conducting interviews that surface real capability and culture fit.",
+  "Generative AI: Transforming HR": "How generative AI is reshaping HR workflows and what to do about it.",
+  "Competency Based Interviewing Skills": "Structured interview techniques that evaluate competencies, not just chemistry.",
+  "Lead Forward: Inclusive Leadership Quest": "Practical inclusive leadership behaviours for everyday management.",
+  "Focus: Risk and Integrity": "Embedding ethical decision-making and risk awareness into daily work.",
+
+  // Leadership Series
+  "Compassionate Leadership": "Leading with empathy without sacrificing standards or accountability.",
+  "Data Analysis and Interpretation": "Turning data into decisions through clear analysis and interpretation.",
+  "Data Analytics for Business": "Using data analytics to drive smarter business choices.",
+  "Leadership Styles To Enhance Productivity": "Adapting your leadership style to bring out the best in different teams.",
+  "Strategic Planning": "Building plans that align day-to-day work with long-term goals.",
+
+  // New Joiner Series
+  "Aspire to Inspire": "Showing up as someone others want to follow and learn from.",
+  "Campus to Corporate": "Bridging the gap between college habits and professional expectations.",
+  "Change Management": "Adapting to and helping others through workplace change.",
+  "Cyber Security": "Security basics every employee needs to protect themselves and the company.",
+  "Finance for Non-Finance": "Decoding finance fundamentals so you can speak the language of business.",
+  "Goal Setting": "Setting goals that are specific, motivating, and actually achievable.",
+  "How To Be An Ethical Leader": "Leading with integrity through everyday choices, big and small.",
+  "Interpersonal Skills": "The relational skills that make collaboration easier and more effective.",
+  "Learning To Say No": "Saying no professionally without damaging relationships or reputation.",
+  "Mastering The Art Of Receiving Feedback": "Turning feedback — even tough feedback — into fuel for growth.",
+  "Meeting Etiquette": "The unwritten rules that make meetings work for everyone.",
+  "Setting Expectations At Workplace": "Clear expectation-setting to prevent misunderstanding and rework.",
+  "Sharpening the Saw": "Continuous self-improvement habits that compound over a career.",
+  "Workplace Etiquette": "Professional conduct norms for in-office and hybrid environments.",
+  "Workplace Health and Safety": "Practical safety awareness for a healthier, safer workplace.",
+  "Respect at Workplace": "Building a culture where every colleague feels respected and safe.",
+  "POSH": "Prevention of Sexual Harassment — your rights, responsibilities, and what to do.",
+
+  // People Management Series
+  "Decision Making Techniques": "Frameworks that lead to better decisions, faster.",
+  "Effective Performance Feedback": "Giving feedback that improves performance without damaging relationships.",
+  "Solving Problems As A Team": "Collaborative problem-solving methods for complex team challenges.",
+  "Leadership Attributes": "The core attributes that distinguish effective leaders.",
+  "Managing Team Dynamics": "Reading and shaping the dynamics that drive team performance.",
+  "Performance Management": "End-to-end performance management — goals, reviews, and development.",
+  "Team Building: Fostering Collaboration & Success": "Building teams where collaboration drives sustained success.",
+
+  // Quality Management Series
+  "Business Process Improvement": "Identifying and removing inefficiencies that slow your business down.",
+  "Continuous Improvement through the PDSA Cycle": "Plan-Do-Study-Act — the simple cycle behind sustained improvement.",
+  "Design Thinking for Innovation": "A human-centred approach to solving problems and creating new value.",
+  "Lean Management": "Lean principles for cutting waste and increasing value flow.",
+  "Quality Management": "Building quality into processes, not just inspecting it at the end.",
+
+  // Sales Series
+  "Building Customer Loyalty": "Earning repeat business through trust, value, and consistent experience.",
+  "Effective Persuasion": "Ethical persuasion techniques that move buyers to a yes.",
+  "Effective Sales Presentation": "Sales presentations that lead with the customer's problem, not your product.",
+  "Essential Techniques for Negotiating a Sale": "Negotiation moves that protect margin while keeping the relationship.",
+  "Mastering The Art Of Successful Negotiation": "Advanced negotiation skills for high-stakes deals.",
+  "Negotiation Skills": "Foundational negotiation skills every professional should have.",
+  "Objection Handling Skills For Sales Associate": "Turning common objections into opportunities to deepen the conversation.",
+  "Overcoming Procrastination": "Beating procrastination so you spend more time on revenue-driving activities.",
+  "Storytelling In Sales": "Using story structure to make your pitch memorable and persuasive.",
+  "Transitioning from Salesperson to Sales Manager": "Shifting from individual contributor to leading a sales team.",
+  "Stakeholder Mapping & Engagement": "Mapping decision makers and influencers to navigate complex deals.",
+  "Relationship Building in B2B Sales": "Long-term relationship strategies that drive enterprise sales success.",
+  "Business Presentation": "Delivering business presentations that earn buy-in from senior audiences.",
+  "Consultative Selling Techniques": "Selling by diagnosing needs, not pitching features.",
+
+  // Self Improvement Series
+  "Action Planning": "Translating goals into concrete actions and accountability.",
+  "Assertiveness: Key to Effective Communication": "Asserting your view confidently without crossing into aggression.",
+  "Being Proactive": "Taking initiative and ownership instead of waiting to be told.",
+  "Building Resilience": "Bouncing back from setbacks and pressure with strength.",
+  "Circle of Influence": "Focusing energy on what you can influence rather than what you can't.",
+  "Critical Thinking Skills": "Analysing arguments, spotting flaws, and reasoning to better conclusions.",
+  "Cultivating A Positive Attitude": "Habits that build and sustain a positive outlook at work.",
+  "Dealing With High Pressure Situation At Work": "Staying composed and effective when the stakes are high.",
+  "Effective Networking": "Building a professional network that creates real value over time.",
+  "Finding Balance: Art of Work Life Harmony": "Sustainable rhythms for blending work and life without burning out.",
+  "Growth Mindset": "Adopting beliefs and behaviours that drive continuous learning.",
+  "How To Set SMART KRAs For Yourself At Work": "Setting Key Result Areas that are specific, measurable, and motivating.",
+  "Increasing Your Emotional Intelligence": "Building EQ to lead yourself and others more effectively.",
+  "Johari Window": "Using the Johari Window model to deepen self-awareness through feedback.",
+  "Logical Thinking": "Structured logical reasoning for clearer thinking and better arguments.",
+  "Mastering Remote Working": "Habits and tools that make remote work productive and sustainable.",
+  "Meeting 101: Unleashing Productivity & Collaboration": "Foundational meeting skills for productive team collaboration.",
+  "Stress Management": "Practical strategies for managing workplace stress before it manages you.",
+  "Time Management": "Prioritising what matters and protecting your most productive hours.",
+  "Why and How to Stop Multi-Tasking": "Why multi-tasking hurts you, and how to focus on one thing at a time.",
+  "Cultural Sensitivity for Expats": "Cultural fluency for professionals working across borders."
+};
+
+// =============================================================
+// TRAILER MAP — Google Drive file IDs per episode (do not edit)
+// =============================================================
 const trailerMap = {
   "Basic Communication Skills": "1PC9FJEkJHJGIKKSsf4eM86SkXeYY7K0c",
   "Building Empathy": "1PEcgbUeFkxZ365Vf52nPQ0nZrkSmefYZ",
@@ -402,6 +705,9 @@ const trailerMap = {
   "Cultural Sensitivity for Expats": "1Bx8BV8GCHkzvFD6dUHoElB4WP05BRF5_"
 };
 
+// =============================================================
+// SERIES DATA — episode lists (do not edit)
+// =============================================================
 const data = [
   { title: "Communication Series", count: 14, runtime: "3h 47m", eyebrow: "SERIES 01", episodes: [["Basic Communication Skills","12 min"],["Building Empathy","30 min"],["Business Correspondence","15 min"],["Communicating For Success","12 min"],["Communication Skill — Improving Grammar","20 min"],["Effective Communication Skills","12 min"],["Effective Listening Skills","20 min"],["Effective Presentation Design","12 min"],["Email Etiquette","15 min"],["English Communication Skills For Professionals","12 min"],["Positive Body Language","20 min"],["Presentation Skills","12 min"],["Probing Skills","20 min"],["Speaking with Confidence","15 min"]] },
   { title: "Customer Management Series", count: 5, runtime: "1h 15m", eyebrow: "SERIES 02", episodes: [["Achieving Customer Service Excellence","15 min"],["Customer Centricity","15 min"],["Customer Engagement","15 min"],["Customer Handling Skills","15 min"],["Customer Service Skills","15 min"]] },
@@ -415,96 +721,190 @@ const data = [
   { title: "Self Improvement Series", count: 21, runtime: "5h 42m", eyebrow: "SERIES 10", episodes: [["Action Planning","15 min"],["Assertiveness: Key to Effective Communication","15 min"],["Being Proactive","15 min"],["Building Resilience","15 min"],["Circle of Influence","15 min"],["Critical Thinking Skills","30 min"],["Cultivating A Positive Attitude","15 min"],["Dealing With High Pressure Situation At Work","15 min"],["Effective Networking","25 min"],["Finding Balance: Art of Work Life Harmony","15 min"],["Growth Mindset","20 min"],["How To Set SMART KRAs For Yourself At Work","15 min"],["Increasing Your Emotional Intelligence","15 min"],["Johari Window","15 min"],["Logical Thinking","15 min"],["Mastering Remote Working","15 min"],["Meeting 101: Unleashing Productivity & Collaboration","12 min"],["Stress Management","15 min"],["Time Management","15 min"],["Why and How to Stop Multi-Tasking","15 min"],["Cultural Sensitivity for Expats","15 min"]] }
 ];
 
-const root = document.getElementById("series-list");
-let activeTrailer = null;
+// =============================================================
+// RENDER
+// =============================================================
+const grid = document.getElementById("grid");
 
-function closeTrailer() {
-  if (!activeTrailer) return;
-  const { row, frame } = activeTrailer;
-  frame.classList.remove("open");
-  frame.querySelector(".trailer-inner").innerHTML = "";
-  row.classList.remove("playing");
-  activeTrailer = null;
+// Modal references (used on desktop)
+const modalBackdrop = document.getElementById("modalBackdrop");
+const modalEyebrow = document.getElementById("modalEyebrow");
+const modalTitle = document.getElementById("modalTitle");
+const modalVideoWrap = document.getElementById("modalVideoWrap");
+const modalSummary = document.getElementById("modalSummary");
+const modalCloseBtn = document.getElementById("modalClose");
+
+const MOBILE_BREAKPOINT = 720;
+const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+
+function openModal({ seriesName, title, fileId, summary }) {
+  modalEyebrow.textContent = seriesName;
+  modalTitle.textContent = title;
+  modalSummary.textContent = summary || "";
+
+  const iframe = document.createElement("iframe");
+  iframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
+  iframe.setAttribute("allow", "autoplay; encrypted-media");
+  iframe.setAttribute("allowfullscreen", "");
+  iframe.title = `${title} trailer`;
+
+  modalVideoWrap.innerHTML = "";
+  modalVideoWrap.appendChild(iframe);
+
+  modalBackdrop.classList.add("open");
+  modalBackdrop.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
 }
 
-function openTrailer(row, frame, fileId, title) {
-  closeTrailer();
-  const inner = frame.querySelector(".trailer-inner");
-  inner.innerHTML = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" allow="autoplay; encrypted-media" allowfullscreen title="${title} trailer"></iframe>`;
-  frame.classList.add("open");
-  row.classList.add("playing");
-  activeTrailer = { row, frame };
-  frame.scrollIntoView({ behavior: "smooth", block: "nearest" });
+function closeModal() {
+  modalBackdrop.classList.remove("open");
+  modalBackdrop.setAttribute("aria-hidden", "true");
+  modalVideoWrap.innerHTML = "";
+  document.body.style.overflow = "";
 }
 
-data.forEach((s, i) => {
-  const num = String(i + 1).padStart(2, "0");
-  const seriesEl = document.createElement("div");
-  seriesEl.className = "series";
+modalCloseBtn.addEventListener("click", closeModal);
+modalBackdrop.addEventListener("click", (e) => {
+  if (e.target === modalBackdrop) closeModal();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && modalBackdrop.classList.contains("open")) closeModal();
+});
 
-  const episodesHtml = s.episodes.map(([title, dur], idx) => {
-    const fileId = trailerMap[title] || DEFAULT_TRAILER_ID;
-    const hasTrailer = !!fileId;
-    const safeTitle = title.replace(/"/g, "&quot;");
-    return `
-      <div class="episode" data-file-id="${fileId || ""}" data-title="${safeTitle}">
-        <div class="play">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M1 0L9 5L1 10Z"/></svg>
-        </div>
-        <div class="episode-idx">${String(idx + 1).padStart(2, "0")}</div>
-        <div class="episode-title">${title}${hasTrailer ? '<span class="badge-preview">PREVIEW</span>' : ""}</div>
-        <div class="episode-dur">${dur}</div>
-      </div>
-      <div class="trailer-frame">
-        <div class="trailer-label">
-          <span>TRAILER · ${safeTitle.toUpperCase()}</span>
-          <button class="trailer-close" type="button">Close</button>
-        </div>
-        <div class="trailer-inner"></div>
-      </div>
-    `;
-  }).join("");
+// Diagnostic counter — count how many episodes have a working trailer mapped
+let trailerHitCount = 0;
+let trailerMissCount = 0;
+const missingTrailers = [];
 
-  seriesEl.innerHTML = `
-    <div class="series-header">
-      <div class="series-num">${num}</div>
-      <div class="series-meta">
-        <div class="series-eyebrow">${s.eyebrow}</div>
-        <div class="series-title">${s.title}</div>
-      </div>
-      <div class="series-right">
-        <div class="series-stats">
-          <div class="count">${s.count} episodes</div>
-          <div>${s.runtime}</div>
-        </div>
-        <svg class="chevron" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+data.forEach((s, seriesIdx) => {
+  const num = String(seriesIdx + 1).padStart(2, "0");
+  const box = document.createElement("div");
+  box.className = "box";
+
+  // Build the static box scaffold (no episode data inside innerHTML)
+  box.innerHTML = `
+    <div class="box-head">
+      <div class="box-num">${num}</div>
+      <div class="box-title-wrap">
+        <div class="box-title"></div>
+        <div class="box-meta"><span class="accent"></span> · <span class="dur"></span></div>
       </div>
     </div>
-    <div class="episodes">${episodesHtml}</div>
+    <select class="ep-select">
+      <option value="">— Select an episode —</option>
+    </select>
+    <div class="ep-detail">
+      <p class="ep-summary"></p>
+      <div class="ep-actions">
+        <button class="play-btn" type="button">
+          <svg width="9" height="9" viewBox="0 0 8 8" fill="currentColor"><path d="M1 0L7 4L1 8Z"/></svg>
+          Play trailer
+        </button>
+        <span class="ep-duration"></span>
+      </div>
+      <div class="trailer-frame">
+        <div class="trailer-inner"></div>
+        <div class="trailer-bar">
+          <span>Trailer preview</span>
+          <button class="trailer-close" type="button">Close</button>
+        </div>
+      </div>
+    </div>
   `;
 
-  seriesEl.querySelector(".series-header").addEventListener("click", () => {
-    seriesEl.classList.toggle("expanded");
-    if (!seriesEl.classList.contains("expanded")) closeTrailer();
+  // Set static text via textContent (safe from any encoding issue)
+  box.querySelector(".box-title").textContent = s.title;
+  box.querySelector(".box-meta .accent").textContent = `${s.count} episodes`;
+  box.querySelector(".box-meta .dur").textContent = s.runtime;
+
+  const select = box.querySelector(".ep-select");
+  const detail = box.querySelector(".ep-detail");
+  const summary = box.querySelector(".ep-summary");
+  const playBtn = box.querySelector(".play-btn");
+  const durationLbl = box.querySelector(".ep-duration");
+  const trailerFrame = box.querySelector(".trailer-frame");
+  const trailerInner = box.querySelector(".trailer-inner");
+  const trailerClose = box.querySelector(".trailer-close");
+
+  // Build options via DOM API — the value is the episode INDEX, not the title.
+  // This avoids all HTML-entity round-trip bugs with & " ' : etc.
+  s.episodes.forEach(([title, dur], epIdx) => {
+    const opt = document.createElement("option");
+    opt.value = String(epIdx);
+    opt.textContent = title;
+    select.appendChild(opt);
+
+    if (trailerMap[title]) {
+      trailerHitCount++;
+    } else {
+      trailerMissCount++;
+      missingTrailers.push(title);
+    }
   });
 
-  seriesEl.querySelectorAll(".episode").forEach((row) => {
-    const frame = row.nextElementSibling;
-    const fileId = row.dataset.fileId;
-    const title = row.dataset.title;
-    if (!fileId) return;
-    row.addEventListener("click", () => {
-      if (activeTrailer && activeTrailer.row === row) closeTrailer();
-      else openTrailer(row, frame, fileId, title);
-    });
-    frame.querySelector(".trailer-close").addEventListener("click", (e) => {
-      e.stopPropagation();
-      closeTrailer();
-    });
+  select.addEventListener("change", () => {
+    trailerFrame.classList.remove("open");
+    trailerInner.innerHTML = "";
+
+    const idx = select.value;
+    if (idx === "") {
+      detail.classList.remove("show");
+      return;
+    }
+    const [title, dur] = s.episodes[parseInt(idx, 10)];
+    summary.textContent = summaries[title] || "Module summary coming soon.";
+    durationLbl.textContent = dur;
+    const fileId = trailerMap[title];
+    playBtn.style.display = fileId ? "inline-flex" : "none";
+    detail.classList.add("show");
+    playBtn.dataset.fileId = fileId || "";
+    playBtn.dataset.title = title;
   });
 
-  root.appendChild(seriesEl);
+  playBtn.addEventListener("click", () => {
+    const fileId = playBtn.dataset.fileId;
+    const title = playBtn.dataset.title;
+    if (!fileId) {
+      console.warn(`No trailer fileId found for: ${title}`);
+      return;
+    }
+
+    if (isMobile()) {
+      // Mobile: inline expansion within the box
+      const iframe = document.createElement("iframe");
+      iframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
+      iframe.setAttribute("allow", "autoplay; encrypted-media");
+      iframe.setAttribute("allowfullscreen", "");
+      iframe.title = `${title} trailer`;
+      trailerInner.innerHTML = "";
+      trailerInner.appendChild(iframe);
+      trailerFrame.classList.add("open");
+    } else {
+      // Desktop: open in shared modal
+      openModal({
+        seriesName: s.title,
+        title: title,
+        fileId: fileId,
+        summary: summaries[title] || ""
+      });
+    }
+  });
+
+  trailerClose.addEventListener("click", () => {
+    trailerFrame.classList.remove("open");
+    trailerInner.innerHTML = "";
+  });
+
+  grid.appendChild(box);
 });
+
+// Print diagnostic summary to browser console
+console.log(`[Mikasa Library] Trailers mapped: ${trailerHitCount} / ${trailerHitCount + trailerMissCount}`);
+if (missingTrailers.length > 0) {
+  console.warn("[Mikasa Library] Episodes WITHOUT a trailer mapped:", missingTrailers);
+}
+console.log("[Mikasa Library] Note: if a trailer iframe shows a Google login wall, set the Drive file's sharing to 'Anyone with the link'.");
+console.log("[Mikasa Library] Note: trailers will NOT play if you're opening this file via file:// — use a real http(s) host.");
 </script>
 
 </body>
