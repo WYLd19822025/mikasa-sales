@@ -97,6 +97,32 @@
   }
   .field input:focus { outline: none; border-color: var(--accent); }
 
+  .tone-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+  .tone-opt {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 12px;
+  }
+  .tone-opt:hover { border-color: var(--border-strong); }
+  .tone-opt.active {
+    background: rgba(230, 57, 70, 0.12);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .tone-opt .name { font-weight: 600; display: block; margin-bottom: 2px; }
+  .tone-opt .desc { font-size: 10px; color: var(--text-dim); line-height: 1.3; }
+  .tone-opt.active .desc { color: var(--text-muted); }
+
   .preview-container {
     background: #0B0B0B;
     border: 1px solid var(--border);
@@ -253,6 +279,22 @@
           <div class="hint">A short phrase shown in the card's intro. Keep it natural.</div>
         </div>
 
+        <p class="section-label" style="margin-top: 1.5rem;">Message tone</p>
+        <div class="tone-group" id="tones">
+          <div class="tone-opt active" data-tone="warm">
+            <span class="name">Warm</span>
+            <span class="desc">Re-engagement, cold lead</span>
+          </div>
+          <div class="tone-opt" data-tone="direct">
+            <span class="name">Direct</span>
+            <span class="desc">Fresh outreach, busy exec</span>
+          </div>
+          <div class="tone-opt" data-tone="short">
+            <span class="name">Short</span>
+            <span class="desc">3 lines, link-first</span>
+          </div>
+        </div>
+
         <p class="section-label" style="margin-top: 1.5rem;">Your details</p>
 
         <div class="field">
@@ -304,6 +346,17 @@
 <script>
 const $ = (id) => document.getElementById(id);
 const inputs = ["name", "role", "company", "phone", "context", "sender", "baseUrl"];
+let tone = "warm";
+
+// Tone selector
+document.querySelectorAll(".tone-opt").forEach(opt => {
+  opt.addEventListener("click", () => {
+    document.querySelectorAll(".tone-opt").forEach(o => o.classList.remove("active"));
+    opt.classList.add("active");
+    tone = opt.dataset.tone;
+    render();
+  });
+});
 
 function getValues() {
   const v = {};
@@ -323,14 +376,48 @@ function buildPitchUrl(v) {
   return base + (params.toString() ? "?" + params.toString() : "");
 }
 
-function buildMessage(v, pitchUrl) {
+// ---- Tone-specific message builders ----
+function buildWarm(v, pitchUrl) {
   const greeting = v.name ? `Hi ${v.name},` : "Hi,";
   let msg = `${greeting}\n\n`;
-  msg += `Put together a quick note for you — take a look:\n\n`;
-  msg += pitchUrl;
-  msg += `\n\n`;
+  if (v.context) {
+    msg += `Hope you've been well. ${v.context.charAt(0).toUpperCase() + v.context.slice(1)} — wanted to circle back with something worth a quick look.\n\n`;
+  } else {
+    msg += `Hope you've been well. Wanted to share something from Mikasa I think you'll find relevant.\n\n`;
+  }
+  msg += `Put together a personal note for you — take a look:\n${pitchUrl}\n\n`;
+  msg += `If priorities have shifted, even a quick line back so I know where to park it would mean a lot.\n\n`;
+  msg += v.sender ? `— ${v.sender}\nMikasa Ventures` : `— Mikasa Ventures`;
+  return msg;
+}
+
+function buildDirect(v, pitchUrl) {
+  const greeting = v.name ? `Hi ${v.name},` : "Hi,";
+  let msg = `${greeting}\n\n`;
+  msg += `Reaching out from Mikasa Ventures — we produce ready-to-deploy L&D content at scale.\n\n`;
+  msg += `Two capabilities worth knowing:\n`;
+  msg += `• Same-day module delivery\n`;
+  msg += `• 100+ hours of content in 48 hours\n\n`;
+  msg += `Quick note written for you with the details:\n${pitchUrl}\n\n`;
+  const target = v.company ? ` at ${v.company}` : "";
+  msg += `If L&D content is on your roadmap${target}, worth a 15-min call?\n\n`;
   msg += v.sender ? `— ${v.sender}, Mikasa Ventures` : `— Mikasa Ventures`;
   return msg;
+}
+
+function buildShort(v, pitchUrl) {
+  const greeting = v.name ? `Hey ${v.name} 👋` : "Hey 👋";
+  let msg = `${greeting}\n\n`;
+  msg += `Quick note for you from Mikasa Ventures:\n${pitchUrl}\n\n`;
+  msg += `Worth a chat?\n\n`;
+  msg += v.sender ? `— ${v.sender}, Mikasa Ventures` : `— Mikasa Ventures`;
+  return msg;
+}
+
+const builders = { warm: buildWarm, direct: buildDirect, short: buildShort };
+
+function buildMessage(v, pitchUrl) {
+  return builders[tone](v, pitchUrl);
 }
 
 function cleanPhone(raw) {
@@ -387,6 +474,12 @@ $("copyBtn").addEventListener("click", async () => {
   inputs.forEach(id => {
     if (params.has(id)) $(id).value = params.get(id);
   });
+  if (params.has("tone") && ["warm", "direct", "short"].includes(params.get("tone"))) {
+    tone = params.get("tone");
+    document.querySelectorAll(".tone-opt").forEach(o => {
+      o.classList.toggle("active", o.dataset.tone === tone);
+    });
+  }
   render();
 })();
 </script>
